@@ -11,6 +11,7 @@ struct Cmd: AsyncParsableCommand {
         version: "0.0.1",
         subcommands: [
             ChatCompletion.self,
+            ChatStreamCompletion.self
         ]
     )
 }
@@ -35,18 +36,27 @@ struct ChatCompletion: AsyncParsableCommand {
         let client = GoogleGenClient(token: options.token)
         let query = GenerateContentRequest(contents: [.init(role: "user", parts: [.init(text: options.prompt)])])
         let resp = try await client.chat(query, model: "gemini-pro")
-        print(resp)
-        
-//        let client = ElevenLabsClient(token: options.token)
-//        let query = TextToSpeechQuery(text: options.prompt)
-//        let data = try await client.textToSpeech(query, voice: "21m00Tcm4TlvDq8ikWAM")
-//        let filename = "\(String.id).mp3"
-//        
-//        if let url = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first?.appending(component: filename) {
-//            try data.write(to: url)
-//            try FileHandle.standardOutput.write(contentsOf: url.absoluteString.data(using: .utf8)!)
-//        } else {
-//            print("unable to create URL")
-//        }
+        let text = resp.candidates.map { candidate in
+            candidate.content.parts.map { $0.text }.joined()
+        }.joined()
+        try FileHandle.standardOutput.write(contentsOf: text.data(using: .utf8)!)
+    }
+}
+
+struct ChatStreamCompletion: AsyncParsableCommand {
+    static var configuration = CommandConfiguration(abstract: "Completes a chat request, streaming the response.")
+    
+    @OptionGroup var options: Options
+    
+    func run() async throws {
+        let client = GoogleGenClient(token: options.token)
+        let query = GenerateContentRequest(contents: [.init(role: "user", parts: [.init(text: options.prompt)])])
+        let stream: AsyncThrowingStream<GenerateContentResponse, Error> = client.chatStream(query, model: "gemini-pro")
+        for try await result in stream {
+            let text = result.candidates.map { candidate in
+                candidate.content.parts.map { $0.text }.joined()
+            }.joined()
+            try FileHandle.standardOutput.write(contentsOf: text.data(using: .utf8)!)
+        }
     }
 }
