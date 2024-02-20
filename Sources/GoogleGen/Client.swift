@@ -40,6 +40,16 @@ public final class GoogleGenClient {
         return makeAsyncRequest(path: "models/\(model):streamGenerateContent", method: "POST", body: payload)
     }
     
+    // Models
+    
+    public func models() async throws -> ModelListResponse {
+        .init(
+            models: [
+                "gemini-pro",
+            ]
+        )
+    }
+    
     // Private
     
     private func makeRequest(path: String, method: String) -> URLRequest {
