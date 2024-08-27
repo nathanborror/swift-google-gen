@@ -33,9 +33,9 @@ struct ChatCompletion: AsyncParsableCommand {
     @OptionGroup var options: Options
     
     func run() async throws {
-        let client = GoogleGenClient(token: options.token)
+        let client = GoogleGenClient(configuration: .init(token: options.token))
         let query = GenerateContentRequest(contents: [.init(role: "user", parts: [.init(text: options.prompt)])])
-        let resp = try await client.chat(query, model: "gemini-pro")
+        let resp = try await client.chat(query, model: Defaults.chatModel)
         let text = resp.candidates.map { candidate in
             candidate.content.parts.map { $0.text }.joined()
         }.joined()
@@ -49,9 +49,9 @@ struct ChatStreamCompletion: AsyncParsableCommand {
     @OptionGroup var options: Options
     
     func run() async throws {
-        let client = GoogleGenClient(token: options.token)
+        let client = GoogleGenClient(configuration: .init(token: options.token))
         let query = GenerateContentRequest(contents: [.init(role: "user", parts: [.init(text: options.prompt)])])
-        let stream: AsyncThrowingStream<GenerateContentResponse, Error> = client.chatStream(query, model: "gemini-pro")
+        let stream: AsyncThrowingStream<GenerateContentResponse, Error> = client.chatStream(query, model: Defaults.chatModel)
         for try await result in stream {
             let text = result.candidates.map { candidate in
                 candidate.content.parts.map { $0.text }.joined()

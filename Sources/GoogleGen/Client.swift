@@ -7,8 +7,8 @@ public final class GoogleGenClient {
         public let host: URL
         public let token: String
         
-        public init(host: URL = URL(string: "https://generativelanguage.googleapis.com/v1beta")!, token: String) {
-            self.host = host
+        public init(host: URL? = nil, token: String) {
+            self.host = host ?? Defaults.apiHost
             self.token = token
         }
     }
@@ -17,10 +17,6 @@ public final class GoogleGenClient {
     
     public init(configuration: Configuration) {
         self.configuration = configuration
-    }
-    
-    public convenience init(token: String) {
-        self.init(configuration: .init(token: token))
     }
     
     // Chats
@@ -43,11 +39,7 @@ public final class GoogleGenClient {
     // Models
     
     public func models() async throws -> ModelListResponse {
-        .init(
-            models: [
-                "gemini-pro",
-            ]
-        )
+        .init(models: Defaults.models)
     }
     
     // Private
