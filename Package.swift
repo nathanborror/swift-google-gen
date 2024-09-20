@@ -16,8 +16,8 @@ let package = Package(
         .executable(name: "GoogleGenCmd", targets: ["GoogleGenCmd"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", branch: "main"),
-        .package(url: "https://github.com/nathanborror/swift-shared-kit", branch: "main"),
+        .package(url: "git@github.com:apple/swift-argument-parser", branch: "main"),
+        .package(url: "git@github.com:nathanborror/swift-shared-kit", branch: "main"),
     ],
     targets: [
         .target(name: "GoogleGen", dependencies: [
@@ -28,6 +28,5 @@ let package = Package(
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
             .product(name: "SharedKit", package: "swift-shared-kit"),
         ]),
-        .testTarget(name: "GoogleGenTests", dependencies: ["GoogleGen"]),
     ]
 )

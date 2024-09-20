@@ -22,6 +22,8 @@ public final class GoogleGenClient {
     // Chats
     
     public func chat(_ payload: GenerateContentRequest, model: String) async throws -> GenerateContentResponse {
+        try checkAuthentication()
+        
         var req = makeRequest(path: "models/\(model):generateContent", method: "POST")
         req.httpBody = try JSONEncoder().encode(payload)
         
@@ -32,17 +34,25 @@ public final class GoogleGenClient {
         return try decoder.decode(GenerateContentResponse.self, from: data)
     }
     
-    public func chatStream(_ payload: GenerateContentRequest, model: String) -> AsyncThrowingStream<GenerateContentResponse, Error> {
+    public func chatStream(_ payload: GenerateContentRequest, model: String) throws -> AsyncThrowingStream<GenerateContentResponse, Error> {
+        try checkAuthentication()
         return makeAsyncRequest(path: "models/\(model):streamGenerateContent", method: "POST", body: payload)
     }
     
     // Models
     
     public func models() async throws -> ModelListResponse {
-        .init(models: Defaults.models)
+        try checkAuthentication()
+        return .init(models: Defaults.models)
     }
     
     // Private
+    
+    private func checkAuthentication() throws {
+        if configuration.token.isEmpty {
+            throw URLError(.userAuthenticationRequired)
+        }
+    }
     
     private func makeRequest(path: String, method: String) -> URLRequest {
         var req = URLRequest(url: configuration.host.appending(path: path))

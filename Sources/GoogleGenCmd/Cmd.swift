@@ -51,7 +51,7 @@ struct ChatStreamCompletion: AsyncParsableCommand {
     func run() async throws {
         let client = GoogleGenClient(configuration: .init(token: options.token))
         let query = GenerateContentRequest(contents: [.init(role: "user", parts: [.init(text: options.prompt)])])
-        let stream: AsyncThrowingStream<GenerateContentResponse, Error> = client.chatStream(query, model: Defaults.chatModel)
+        let stream: AsyncThrowingStream<GenerateContentResponse, Error> = try client.chatStream(query, model: Defaults.chatModel)
         for try await result in stream {
             let text = result.candidates.map { candidate in
                 candidate.content.parts.map { $0.text }.joined()
